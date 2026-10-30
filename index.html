@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#dce6ec">
+  <meta name="description" content="方方的歌單與存鑽存歌整合入口。">
+  <title>慌慌の花園</title>
+  <!-- 與兩個原網站一致的 🌸 網頁分頁圖示 -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='0.9em' font-size='90'%3E🌸%3C/text%3E%3C/svg%3E">
+  <style>
+    :root {
+      color-scheme: light;
+      --bar-height: 62px;
+      --ink: #536777;
+      --muted: #8193a0;
+      --line: rgba(115, 139, 154, .22);
+      --bar: rgba(247, 250, 251, .96);
+      --active: #7895a8;
+      --active-ink: #fff;
+    }
+    * { box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; }
+    body {
+      display: flex;
+      flex-direction: column;
+      background: #e9eff2;
+      color: var(--ink);
+      font-family: "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+    }
+    .topbar {
+      position: relative;
+      z-index: 5;
+      flex: 0 0 var(--bar-height);
+      height: var(--bar-height);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 0 18px;
+      background: var(--bar);
+      border-bottom: 1px solid var(--line);
+      box-shadow: 0 3px 14px rgba(73, 96, 111, .08);
+      backdrop-filter: blur(12px);
+    }
+    .brand {
+      flex: 0 0 auto;
+      color: #607b8d;
+      font-family: "Noto Serif TC", "Noto Sans TC", serif;
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: .04em;
+      white-space: nowrap;
+      user-select: none;
+    }
+    .tabs {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 8px;
+      min-width: 0;
+    }
+    .tab {
+      appearance: none;
+      border: 1px solid rgba(120, 149, 168, .28);
+      border-radius: 999px;
+      padding: 8px 17px;
+      min-height: 38px;
+      background: rgba(225, 234, 239, .65);
+      color: #647e8e;
+      font: inherit;
+      font-size: 14px;
+      font-weight: 700;
+      line-height: 1.2;
+      white-space: nowrap;
+      cursor: pointer;
+      transition: background .18s ease, color .18s ease, box-shadow .18s ease, transform .18s ease;
+    }
+    .tab:hover { transform: translateY(-1px); }
+    .tab[aria-selected="true"] {
+      color: var(--active-ink);
+      background: var(--active);
+      border-color: var(--active);
+      box-shadow: 0 3px 9px rgba(89, 119, 139, .2);
+    }
+    .tab:focus-visible { outline: 3px solid rgba(120, 149, 168, .35); outline-offset: 2px; }
+    main {
+      position: relative;
+      flex: 1 1 auto;
+      min-height: 0;
+      width: 100%;
+      background: #edf2f4;
+    }
+    .site-frame {
+      display: none;
+      width: 100%;
+      height: 100%;
+      border: 0;
+      background: transparent;
+    }
+    .site-frame.is-active { display: block; }
+    @media (max-width: 520px) {
+      :root { --bar-height: 58px; }
+      .topbar { padding: 0 9px; gap: 6px; }
+      .brand { font-size: 14px; letter-spacing: 0; }
+      .tabs { gap: 5px; }
+      .tab { min-height: 36px; padding: 7px 10px; font-size: 12px; }
+    }
+    @media (max-width: 360px) {
+      .brand { font-size: 13px; }
+      .tab { padding-inline: 8px; font-size: 11px; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand" aria-label="慌慌の花園">🌸 慌慌の花園</div>
+    <nav class="tabs" role="tablist" aria-label="切換網站功能">
+      <button class="tab" id="tab-songs" type="button" role="tab" aria-controls="page-songs" aria-selected="true" data-page="songs">♫ 方方歌單</button>
+      <button class="tab" id="tab-money" type="button" role="tab" aria-controls="page-money" aria-selected="false" data-page="money">🌸 存鑽存歌</button>
+    </nav>
+  </header>
+
+  <main>
+    <iframe
+      class="site-frame is-active"
+      id="page-songs"
+      title="方方歌單"
+      src="https://lionliontomato.github.io/fang-fang/"
+      allow="clipboard-read; clipboard-write"
+      referrerpolicy="strict-origin-when-cross-origin">
+    </iframe>
+    <iframe
+      class="site-frame"
+      id="page-money"
+      title="慌慌の存鑽存歌"
+      data-src="https://lionliontomato.github.io/sing-MoneyFang/"
+      allow="clipboard-read; clipboard-write"
+      referrerpolicy="strict-origin-when-cross-origin">
+    </iframe>
+  </main>
+
+  <script>
+    (() => {
+      const tabs = Array.from(document.querySelectorAll('.tab'));
+      const pages = {
+        songs: document.getElementById('page-songs'),
+        money: document.getElementById('page-money')
+      };
+
+      function switchPage(name) {
+        const selectedPage = pages[name];
+        if (!selectedPage) return;
+
+        // 第二個頁面在第一次切換時才載入，避免初次開啟同時重複讀取兩份資料。
+        if (!selectedPage.src || selectedPage.getAttribute('src') === window.location.href) {
+          const lazySrc = selectedPage.dataset.src;
+          if (lazySrc) selectedPage.src = lazySrc;
+        } else if (!selectedPage.getAttribute('src') && selectedPage.dataset.src) {
+          selectedPage.src = selectedPage.dataset.src;
+        }
+
+        Object.entries(pages).forEach(([key, frame]) => {
+          const active = key === name;
+          frame.classList.toggle('is-active', active);
+          frame.setAttribute('aria-hidden', String(!active));
+        });
+        tabs.forEach(tab => {
+          const active = tab.dataset.page === name;
+          tab.setAttribute('aria-selected', String(active));
+          tab.tabIndex = active ? 0 : -1;
+        });
+        document.title = name === 'songs' ? '方方歌單｜慌慌の花園' : '存鑽存歌｜慌慌の花園';
+        // 兩個原網站都使用 🌸 favicon；整合頁切換時持續沿用同一圖示。
+      }
+
+      tabs.forEach(tab => tab.addEventListener('click', () => switchPage(tab.dataset.page)));
+      tabs.forEach((tab, index) => tab.addEventListener('keydown', event => {
+        if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
+        event.preventDefault();
+        const next = tabs[(index + (event.key === 'ArrowRight' ? 1 : tabs.length - 1)) % tabs.length];
+        next.focus();
+        switchPage(next.dataset.page);
+      }));
+    })();
+  </script>
+</body>
+</html>
